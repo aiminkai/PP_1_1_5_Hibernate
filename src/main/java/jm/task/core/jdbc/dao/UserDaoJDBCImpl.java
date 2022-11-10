@@ -12,6 +12,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     private Statement staitment = null;
     private Connection connection = null;
+
     private String newTable = "CREATE TABLE IF NOT EXISTS `myjdbc_test`.`users` (\n" +
             "  `ID` BIGINT NOT NULL AUTO_INCREMENT,\n" +
             "  `name` VARCHAR(255) NOT NULL,\n" +
@@ -27,73 +28,117 @@ public class UserDaoJDBCImpl implements UserDao {
     {
         try {
             connection = Util.getConnection();
-        } catch (IOException e) {
+            connection.setAutoCommit(false);
+        } catch (IOException | SQLException e) {
             e.printStackTrace();
         }
     }
 
 
     public void createUsersTable() {
-        try (Statement statement = connection.createStatement()) {
+        try  {
+            Statement statement = connection.createStatement();
             statement.execute(newTable);
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
         }
+
     }
 
     public void dropUsersTable() {
-        try (Statement statement = connection.createStatement()) {
+        try {
+            Statement statement = connection.createStatement();
             statement.execute(deleteTable);
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
 
     public void saveUser(String name, String lastName, byte age) {
-        try (PreparedStatement pstm = connection.prepareStatement(addUser);) {
+        try {
+            PreparedStatement pstm = connection.prepareStatement(addUser);
             pstm.setString(1, name);
             pstm.setString(2, lastName);
             pstm.setByte(3, age);
             pstm.execute();
             System.out.println("User с именем – " + name + " добавлен в базу данных");
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
         }
 
     }
 
     public void removeUserById(long id) {
-        try (PreparedStatement pstm = connection.prepareStatement(remUserById)) {
+        try {
+            PreparedStatement pstm = connection.prepareStatement(remUserById);
             pstm.setLong(1, id);
             pstm.executeUpdate();
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
 
-        try (ResultSet resultSet = connection.createStatement().executeQuery(getAll)) {
+        try {
+        ResultSet resultSet = connection.createStatement().executeQuery(getAll);
             while(resultSet.next()) {
                 User user = new User(resultSet.getString("name"),
                         resultSet.getString("lastName"), resultSet.getByte("age"));
                 user.setId(resultSet.getLong("id"));
                 users.add(user);
+                connection.commit();
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
         }
 
         return users;
     }
 
     public void cleanUsersTable() {
-        try (Statement statement = connection.createStatement()) {
+        try {
+            Statement statement = connection.createStatement();
             statement.executeUpdate(cleanTable);
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 }
