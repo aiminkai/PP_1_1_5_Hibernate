@@ -36,40 +36,32 @@ public class UserDaoJDBCImpl implements UserDao {
 
 
     public void createUsersTable() {
-        try  {
-            Statement statement = connection.createStatement();
+        try (Statement statement = connection.createStatement()) {
+            connection.rollback();
             statement.execute(newTable);
             connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
-            try {
-                connection.rollback();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
+
         }
 
     }
 
     public void dropUsersTable() {
-        try {
-            Statement statement = connection.createStatement();
+        try (Statement statement = connection.createStatement()) {
+            connection.rollback();
             statement.execute(deleteTable);
             connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
-            try {
-                connection.rollback();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
         }
     }
 
 
     public void saveUser(String name, String lastName, byte age) {
-        try {
-            PreparedStatement pstm = connection.prepareStatement(addUser);
+        try (PreparedStatement pstm = connection.prepareStatement(addUser))
+        {
+            connection.rollback();
             pstm.setString(1, name);
             pstm.setString(2, lastName);
             pstm.setByte(3, age);
@@ -78,37 +70,31 @@ public class UserDaoJDBCImpl implements UserDao {
             connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
-            try {
-                connection.rollback();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
+
         }
 
     }
 
     public void removeUserById(long id) {
-        try {
-            PreparedStatement pstm = connection.prepareStatement(remUserById);
+        try (PreparedStatement pstm = connection.prepareStatement(remUserById))
+        {
+            connection.rollback();
             pstm.setLong(1, id);
             pstm.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
-            try {
-                connection.rollback();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
+
         }
     }
 
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
 
-        try {
-        ResultSet resultSet = connection.createStatement().executeQuery(getAll);
-            while(resultSet.next()) {
+        try (ResultSet resultSet = connection.createStatement().executeQuery(getAll))
+        {
+            connection.rollback();
+            while (resultSet.next()) {
                 User user = new User(resultSet.getString("name"),
                         resultSet.getString("lastName"), resultSet.getByte("age"));
                 user.setId(resultSet.getLong("id"));
@@ -117,28 +103,21 @@ public class UserDaoJDBCImpl implements UserDao {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            try {
-                connection.rollback();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
+
         }
 
         return users;
     }
 
     public void cleanUsersTable() {
-        try {
-            Statement statement = connection.createStatement();
+        try (Statement statement = connection.createStatement())
+        {
+            connection.rollback();
             statement.executeUpdate(cleanTable);
             connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
-            try {
-                connection.rollback();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
+
         }
     }
 }
