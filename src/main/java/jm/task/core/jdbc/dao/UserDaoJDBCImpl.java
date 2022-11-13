@@ -31,69 +31,68 @@ public class UserDaoJDBCImpl implements UserDao {
             connection.setAutoCommit(false);
         } catch (IOException | SQLException e) {
             e.printStackTrace();
+
         }
     }
 
 
-    public void createUsersTable() {
+    public void createUsersTable() throws SQLException {
         try (Statement statement = connection.createStatement()) {
-            connection.rollback();
-            statement.execute(newTable);
+            statement.executeUpdate(newTable);
             connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
-
+            connection.rollback();
         }
 
     }
 
-    public void dropUsersTable() {
+    public void dropUsersTable() throws SQLException {
         try (Statement statement = connection.createStatement()) {
-            connection.rollback();
-            statement.execute(deleteTable);
+            statement.executeUpdate(deleteTable);
             connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
+            connection.rollback();
         }
     }
 
 
-    public void saveUser(String name, String lastName, byte age) {
-        try (PreparedStatement pstm = connection.prepareStatement(addUser))
-        {
-            connection.rollback();
+    public void saveUser(String name, String lastName, byte age) throws SQLException {
+        try (PreparedStatement pstm = connection.prepareStatement(addUser)) {
+
             pstm.setString(1, name);
             pstm.setString(2, lastName);
             pstm.setByte(3, age);
-            pstm.execute();
+            pstm.executeUpdate();
             System.out.println("User с именем – " + name + " добавлен в базу данных");
             connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
+            connection.rollback();
 
         }
 
     }
 
-    public void removeUserById(long id) {
-        try (PreparedStatement pstm = connection.prepareStatement(remUserById))
-        {
+    public void removeUserById(long id) throws SQLException {
+        try (PreparedStatement pstm = connection.prepareStatement(remUserById)) {
             connection.rollback();
             pstm.setLong(1, id);
             pstm.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
+            connection.rollback();
 
         }
     }
 
-    public List<User> getAllUsers() {
+    public List<User> getAllUsers() throws SQLException {
         List<User> users = new ArrayList<>();
 
-        try (ResultSet resultSet = connection.createStatement().executeQuery(getAll))
-        {
-            connection.rollback();
+        try (ResultSet resultSet = connection.createStatement().executeQuery(getAll)) {
+
             while (resultSet.next()) {
                 User user = new User(resultSet.getString("name"),
                         resultSet.getString("lastName"), resultSet.getByte("age"));
@@ -103,20 +102,21 @@ public class UserDaoJDBCImpl implements UserDao {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            connection.rollback();
 
         }
 
         return users;
     }
 
-    public void cleanUsersTable() {
-        try (Statement statement = connection.createStatement())
-        {
+    public void cleanUsersTable() throws SQLException {
+        try (Statement statement = connection.createStatement()) {
             connection.rollback();
             statement.executeUpdate(cleanTable);
             connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
+            connection.rollback();
 
         }
     }

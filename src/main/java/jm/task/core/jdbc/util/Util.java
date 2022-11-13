@@ -15,12 +15,12 @@ public class Util {
     private static Connection connection = null;
 
     public static Connection getConnection() throws IOException {
-        //Properties props = getProps();
+
         try {
             Driver driver = new NonRegisteringDriver();
             DriverManager.registerDriver(driver);
             connection = DriverManager.getConnection(URL, NAME, PASSWORD);
-            //
+
         } catch (SQLException e) {
             System.err.println("не удалось соединиться");
         }
