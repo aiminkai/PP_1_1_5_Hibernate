@@ -77,7 +77,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void removeUserById(long id) throws SQLException {
         try (PreparedStatement pstm = connection.prepareStatement(remUserById)) {
-            connection.rollback();
+
             pstm.setLong(1, id);
             pstm.executeUpdate();
             connection.commit();
@@ -111,7 +111,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void cleanUsersTable() throws SQLException {
         try (Statement statement = connection.createStatement()) {
-            connection.rollback();
+
             statement.executeUpdate(cleanTable);
             connection.commit();
         } catch (SQLException e) {
